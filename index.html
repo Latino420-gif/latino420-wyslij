@@ -1,0 +1,87 @@
+<!DOCTYPE html><html lang="pl"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<meta name="referrer" content="no-referrer"><title>Latino420 – wyślij listę</title>
+<meta http-equiv="Content-Security-Policy" content="default-src 'none'; script-src 'unsafe-inline'; style-src 'unsafe-inline'; connect-src https://ntfy.sh https://ntfy.envs.net; img-src data:">
+<style>
+body{background:#0B0B0B;color:#eee;font-family:sans-serif;margin:0;padding:16px}
+h1{color:#E6C878;text-align:center;margin:6px 0}.sub{text-align:center;color:#B5B5B5;margin:0 0 10px}
+.card{background:#141414;border:1px solid #3a3220;border-radius:12px;padding:14px;margin:12px 0}h3{color:#B8902F;margin:0 0 8px}
+label{display:block;color:#B5B5B5;font-size:13px;margin:8px 0 4px}input,select{width:100%;box-sizing:border-box;padding:10px;background:#0B0B0B;color:#fff;border:1px solid #3a3220;border-radius:8px}
+input:focus,select:focus{border-color:#B8902F;outline:none}.btn{width:100%;margin-top:10px;padding:12px;border:0;border-radius:8px;background:linear-gradient(135deg,#8C6A1F,#C9A24A 35%,#E6C878 55%,#A67C2E);color:#0B0B0B;font-weight:700;font-size:15px}
+.btn2{background:transparent;border:1px solid #B8902F;color:#E6C878}.row{display:flex;gap:8px}.row .btn{flex:1}
+.dev{padding:10px;border:1px solid #3a3220;border-radius:8px;margin-top:6px;cursor:pointer}.dev.sel{border-color:#B8902F;background:#1f1a0e;color:#E6C878}
+#msg{text-align:center;margin-top:10px;color:#E6C878;min-height:20px}.hid{display:none}
+.ew{display:flex;gap:6px}.ew input{flex:1}.eb{flex:none;width:auto!important;margin:0!important;padding:8px 10px!important;background:transparent!important;border:1px solid #8C6A1F!important;color:#E6C878!important;border-radius:8px;font-size:12px!important}
+.card{background:linear-gradient(160deg,rgba(40,33,18,.55),rgba(14,13,10,.85));border:1px solid rgba(201,162,74,.35);border-radius:18px;box-shadow:0 10px 30px rgba(0,0,0,.5),inset 0 1px 0 rgba(255,235,180,.1)}
+h1{font-size:28px;font-weight:800;background:linear-gradient(135deg,#8C6A1F,#C9A24A 35%,#E6C878 55%,#A67C2E);-webkit-background-clip:text;color:transparent}
+h3{color:#C9A24A}.btn{border-radius:12px;box-shadow:0 6px 18px rgba(184,144,47,.25);transition:transform .25s cubic-bezier(.34,1.56,.64,1)}.btn:active{transform:scale(.96)}
+input,select{border-radius:12px;border-color:rgba(201,162,74,.35)}body{background:radial-gradient(ellipse at top,#1d170b,#070707 60%)}.ver{text-align:center;color:#6d6040;font-size:11px;margin-top:14px}
+.hid{display:none}.code{font:800 30px ui-monospace,monospace;letter-spacing:.15em;text-align:center;text-transform:uppercase}
+.nl{border:1px solid rgba(201,162,74,.35);border-radius:12px;padding:10px;margin:8px 0}.nl-h{display:flex;justify-content:space-between;align-items:center;color:#E6C878}
+.nl-x{background:transparent;border:1px solid #8C6A1F;color:#E6C878;border-radius:8px;padding:4px 10px}.sub2{color:#B5B5B5;font-size:13px;margin:0 0 8px}
+#nmsg{text-align:center;margin:12px 0;min-height:22px;color:#E6C878}#nmsg.ok{color:#8fe08f}#nmsg.err{color:#ff8a7a}
+.btn:disabled{opacity:.5}input,select{font-size:16px}</style></head><body>
+<h1>Latino420</h1><p class="sub">Wyślij listę na telewizor przez internet</p>
+<div class="card"><h3>1. Kod z telewizora</h3><p class="sub2">W Latino420: ☰ Listy → ＋ Dodaj nową listę → 🌍 Odbierz przez internet</p>
+ <input id="ncode" class="code" inputmode="text" autocomplete="off" autocapitalize="characters" spellcheck="false" maxlength="9" placeholder="XXXX-XXXX"></div>
+<div class="card"><h3>2. Listy</h3><div id="nlists"></div><button type="button" class="btn btn2" id="nadd">＋ Dodaj kolejną listę</button></div>
+<button type="button" class="btn" id="nsend">Wyślij do telewizora</button><div id="nmsg"></div>
+
+<p class="ver">Szyfrowanie AES-256 na tym urządzeniu • przekaźnik ntfy widzi tylko szyfrogram • strona nic nie zapisuje</p>
+<script>/* Latino420 – wysyłanie list przez internet (kod 8 znaków). Wspólne dla strony (iPhone/Safari) i aplikacji Latino420 Remote.
+   Szyfrowanie na urządzeniu: PBKDF2-SHA256 + AES-256-GCM. Strona nie zapisuje list ani kodów. */
+(function () {
+  const ALPH = '23456789ABCDEFGHJKMNPQRSTUVWXYZ', RELAYS = ['https://ntfy.sh', 'https://ntfy.envs.net'], PREFIX = 'L420E1.';
+  const te = new TextEncoder();
+  const normCode = s => { const c = String(s || '').toUpperCase().replace(/[\s-]/g, ''); return c.length === 8 && [...c].every(x => ALPH.includes(x)) ? c : null; };
+  async function pbkdf2(pass, salt, iter, bits) { const k = await crypto.subtle.importKey('raw', te.encode(pass), 'PBKDF2', false, ['deriveBits']);
+    return new Uint8Array(await crypto.subtle.deriveBits({ name: 'PBKDF2', hash: 'SHA-256', salt, iterations: iter }, k, bits)); }
+  const hex = b => [...b].map(x => x.toString(16).padStart(2, '0')).join('');
+  const b64u = b => { let s = ''; b.forEach(x => s += String.fromCharCode(x)); return btoa(s).replace(/\+/g, '-').replace(/\//g, '_').replace(/=+$/, ''); };
+  const unb64u = s => Uint8Array.from(atob(s.replace(/-/g, '+').replace(/_/g, '/') + '==='.slice((s.length + 3) % 4)), c => c.charCodeAt(0));
+  async function topic(code) { return 'l420' + hex(await pbkdf2(code, te.encode('latino420-topic-v1'), 20000, 96)); }
+  async function seal(code, tp, plain) { const salt = crypto.getRandomValues(new Uint8Array(16)), iv = crypto.getRandomValues(new Uint8Array(12));
+    const key = await crypto.subtle.importKey('raw', await pbkdf2(code, salt, 50000, 256), 'AES-GCM', false, ['encrypt']);
+    const ct = new Uint8Array(await crypto.subtle.encrypt({ name: 'AES-GCM', iv, additionalData: te.encode(tp), tagLength: 128 }, key, te.encode(plain)));
+    const all = new Uint8Array(16 + 12 + ct.length); all.set(salt); all.set(iv, 16); all.set(ct, 28); return PREFIX + b64u(all); }
+  async function open(code, tp, env) { if (!env.startsWith(PREFIX)) return null; const b = unb64u(env.slice(PREFIX.length));
+    const key = await crypto.subtle.importKey('raw', await pbkdf2(code, b.slice(0, 16), 50000, 256), 'AES-GCM', false, ['decrypt']);
+    try { return new TextDecoder().decode(await crypto.subtle.decrypt({ name: 'AES-GCM', iv: b.slice(16, 28), additionalData: te.encode(tp), tagLength: 128 }, key, b.slice(28))); } catch (e) { return null; } }
+  async function webSend(code, plain) { const tp = await topic(code), env = await seal(code, tp, plain);
+    if (env.length > 3900) throw new Error('Za dużo danych – wyślij mniej list naraz');
+    let err = ''; for (const r of RELAYS) { try { const x = await fetch(r + '/' + tp, { method: 'POST', body: env }); if (x.ok) return r; err = 'HTTP ' + x.status; } catch (e) { err = e.message; } }
+    throw new Error('Przekaźnik niedostępny (' + err + ')'); }
+  window.L420Net = { normCode, topic, seal, open, webSend, ALPH };
+
+  // ---------- UI ----------
+  const $ = id => document.getElementById(id);
+  let n = 0;
+  function row() { const i = ++n, d = document.createElement('div'); d.className = 'nl'; d.dataset.i = i;
+    d.innerHTML = `<div class="nl-h"><b>Lista ${document.querySelectorAll('.nl').length + 1}</b><button type="button" class="nl-x" aria-label="Usuń listę">✕</button></div>
+      <label>Typ</label><select class="nl-t"><option value="m3u">Playlista M3U (URL)</option><option value="xtream">Xtream Codes</option></select>
+      <label>Nazwa (opcjonalnie)</label><input class="nl-n" maxlength="60" placeholder="Moja lista">
+      <label class="nl-ul">URL playlisty</label><input class="nl-u" type="url" autocomplete="off" autocapitalize="off" spellcheck="false" placeholder="http://...">
+      <div class="nl-xt hid"><label>Użytkownik</label><input class="nl-us" autocomplete="off" autocapitalize="off" spellcheck="false"><label>Hasło</label><input class="nl-pw" type="password" autocomplete="off"></div>
+      <label>Własny EPG (opcjonalnie)</label><input class="nl-e" type="url" autocomplete="off" autocapitalize="off" spellcheck="false" placeholder="http://... .xml / .xml.gz">`;
+    const t = d.querySelector('.nl-t'), upd = () => { const x = t.value === 'xtream'; d.querySelector('.nl-xt').classList.toggle('hid', !x); d.querySelector('.nl-ul').textContent = x ? 'URL serwera (http://host:port)' : 'URL playlisty'; };
+    t.onchange = upd; upd(); d.querySelector('.nl-x').onclick = () => { if (document.querySelectorAll('.nl').length > 1) { d.remove(); renum(); } };
+    $('nlists').appendChild(d); renum(); return d; }
+  function renum() { document.querySelectorAll('.nl').forEach((d, i) => d.querySelector('.nl-h b').textContent = 'Lista ' + (i + 1)); }
+  function collect() { const out = []; for (const d of document.querySelectorAll('.nl')) { const v = c => d.querySelector(c).value.trim(), t = v('.nl-t');
+      const o = { type: t, name: v('.nl-n'), url: v('.nl-u') }; if (!/^https?:\/\/\S+$/i.test(o.url)) throw new Error('Lista „' + (o.name || d.querySelector('.nl-h b').textContent) + '”: podaj adres zaczynający się od http:// lub https://');
+      if (t === 'xtream') { o.username = v('.nl-us'); o.password = d.querySelector('.nl-pw').value; if (!o.username || !o.password) throw new Error('Xtream: podaj użytkownika i hasło'); }
+      const e = v('.nl-e'); if (e) { if (!/^https?:\/\/\S+$/i.test(e)) throw new Error('Zły adres EPG'); o.epg = e; } out.push(o); }
+    return out; }
+  function msg(t, ok) { const m = $('nmsg'); m.textContent = t; m.className = ok === true ? 'ok' : ok === false ? 'err' : ''; }
+  window.L420NetUI = function (nativeSend) {
+    row(); $('nadd').onclick = () => { if (document.querySelectorAll('.nl').length >= 20) return msg('Maksymalnie 20 list naraz', false); row().querySelector('.nl-u').focus(); };
+    $('ncode').oninput = e => { const c = e.target.value.toUpperCase().replace(/[^0-9A-Z]/g, '').slice(0, 8); e.target.value = c.length > 4 ? c.slice(0, 4) + '-' + c.slice(4) : c; };
+    $('nsend').onclick = async () => { const code = normCode($('ncode').value); if (!code) return msg('Wpisz 8-znakowy kod z ekranu telewizora (np. ABCD-2345)', false);
+      let lists; try { lists = collect(); } catch (e) { return msg(e.message, false); }
+      const plain = JSON.stringify({ v: 1, lists }); $('nsend').disabled = true; msg('Szyfrowanie i wysyłanie…');
+      try { if (nativeSend) await nativeSend(code, plain); else await webSend(code, plain);
+        msg(`✔ Wysłano ${lists.length} ${lists.length === 1 ? 'listę' : lists.length < 5 ? 'listy' : 'list'}. Sprawdź telewizor – lista pojawi się w „☰ Listy” w ciągu kilku sekund.`, true); }
+      catch (e) { msg('✖ Nie wysłano: ' + e.message, false); } finally { $('nsend').disabled = false; } };
+  };
+})();
+
+L420NetUI(null);</script></body></html>
