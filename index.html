@@ -73,7 +73,7 @@ input,select{border-radius:12px;border-color:rgba(201,162,74,.35)}body{backgroun
     return out; }
   function msg(t, ok) { const m = $('nmsg'); m.textContent = t; m.className = ok === true ? 'ok' : ok === false ? 'err' : ''; }
   window.L420NetUI = function (nativeSend) {
-    row(); $('nadd').onclick = () => { if (document.querySelectorAll('.nl').length >= 20) return msg('Maksymalnie 20 list naraz', false); row().querySelector('.nl-u').focus(); };
+    row(); $('nadd').onclick = () => { row().querySelector('.nl-u').focus(); };
     $('ncode').oninput = e => { const c = e.target.value.toUpperCase().replace(/[^0-9A-Z]/g, '').slice(0, 8); e.target.value = c.length > 4 ? c.slice(0, 4) + '-' + c.slice(4) : c; };
     $('nsend').onclick = async () => { const code = normCode($('ncode').value); if (!code) return msg('Wpisz 8-znakowy kod z ekranu telewizora (np. ABCD-2345)', false);
       let lists; try { lists = collect(); } catch (e) { return msg(e.message, false); }
