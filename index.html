@@ -50,24 +50,46 @@ input,select{border-radius:12px;border-color:rgba(201,162,74,.35)}body{backgroun
     if (env.length > 3900) throw new Error('Za dużo danych – wyślij mniej list naraz');
     let err = ''; for (const r of RELAYS) { try { const x = await fetch(r + '/' + tp, { method: 'POST', body: env }); if (x.ok) return r; err = 'HTTP ' + x.status; } catch (e) { err = e.message; } }
     throw new Error('Przekaźnik niedostępny (' + err + ')'); }
-  window.L420Net = { normCode, topic, seal, open, webSend, ALPH };
+  async function gz(plain) { if (typeof CompressionStream === 'undefined') throw new Error('Ta przeglądarka nie obsługuje wysyłania plików – zaktualizuj ją');
+    return new Uint8Array(await new Response(new Blob([te.encode(plain)]).stream().pipeThrough(new CompressionStream('gzip'))).arrayBuffer()); }
+  async function bigSend(code, plain) { const tp = await topic(code), salt = crypto.getRandomValues(new Uint8Array(16)), iv = crypto.getRandomValues(new Uint8Array(12));
+    const key = await crypto.subtle.importKey('raw', await pbkdf2(code, salt, 50000, 256), 'AES-GCM', false, ['encrypt']);
+    const ct = new Uint8Array(await crypto.subtle.encrypt({ name: 'AES-GCM', iv, additionalData: te.encode(tp), tagLength: 128 }, key, await gz(plain)));
+    const all = new Uint8Array(6 + 28 + ct.length); all.set(te.encode('L420Z1')); all.set(salt, 6); all.set(iv, 22); all.set(ct, 34);
+    if (all.length > 15000000) throw new Error('Plik za duży (max ok. 15 MB po kompresji)');
+    const fn = 'l420' + hex(crypto.getRandomValues(new Uint8Array(6))) + '.bin';
+    let err = ''; for (const r of RELAYS) { try { const x = await fetch(r + '/' + tp, { method: 'PUT', body: all, headers: { 'Filename': fn } }); if (x.ok) return r; err = 'HTTP ' + x.status; } catch (e) { err = e.message; } }
+    throw new Error('Przekaźnik niedostępny (' + err + ')'); }
+  async function anySend(code, plain) { const tp = await topic(code), env = await seal(code, tp, plain); return env.length <= 3900 ? webSend(code, plain) : bigSend(code, plain); }
+  window.L420Net = { normCode, topic, seal, open, webSend, bigSend, anySend, ALPH };
 
   // ---------- UI ----------
   const $ = id => document.getElementById(id);
   let n = 0;
   function row() { const i = ++n, d = document.createElement('div'); d.className = 'nl'; d.dataset.i = i;
     d.innerHTML = `<div class="nl-h"><b>Lista ${document.querySelectorAll('.nl').length + 1}</b><button type="button" class="nl-x" aria-label="Usuń listę">✕</button></div>
-      <label>Typ</label><select class="nl-t"><option value="m3u">Playlista M3U (URL)</option><option value="xtream">Xtream Codes</option></select>
+      <label>Typ</label><select class="nl-t"><option value="m3u">Playlista M3U (URL)</option><option value="xtream">Xtream Codes</option><option value="mac">Portal MAC</option><option value="m3ufile">Plik M3U (z telefonu)</option></select>
       <label>Nazwa (opcjonalnie)</label><input class="nl-n" maxlength="60" placeholder="Moja lista">
-      <label class="nl-ul">URL playlisty</label><input class="nl-u" type="url" autocomplete="off" autocapitalize="off" spellcheck="false" placeholder="http://...">
+      <div class="nl-uw"><label class="nl-ul">URL playlisty</label><input class="nl-u" type="url" autocomplete="off" autocapitalize="off" spellcheck="false" placeholder="http://..."></div>
+      <div class="nl-mc hid"><label>Adres MAC</label><input class="nl-m" autocomplete="off" autocapitalize="characters" spellcheck="false" maxlength="17" placeholder="00:1A:79:XX:XX:XX"></div>
+      <div class="nl-fw hid"><label>Plik .m3u / .m3u8</label><input class="nl-f" type="file" accept=".m3u,.m3u8,audio/x-mpegurl,application/x-mpegurl,application/vnd.apple.mpegurl,text/plain"></div>
       <div class="nl-xt hid"><label>Użytkownik</label><input class="nl-us" autocomplete="off" autocapitalize="off" spellcheck="false"><label>Hasło</label><input class="nl-pw" type="password" autocomplete="off"></div>
       <label>Własny EPG (opcjonalnie)</label><input class="nl-e" type="url" autocomplete="off" autocapitalize="off" spellcheck="false" placeholder="http://... .xml / .xml.gz">`;
-    const t = d.querySelector('.nl-t'), upd = () => { const x = t.value === 'xtream'; d.querySelector('.nl-xt').classList.toggle('hid', !x); d.querySelector('.nl-ul').textContent = x ? 'URL serwera (http://host:port)' : 'URL playlisty'; };
+    const t = d.querySelector('.nl-t'), upd = () => { const v = t.value, x = v === 'xtream'; d.querySelector('.nl-xt').classList.toggle('hid', !x); d.querySelector('.nl-mc').classList.toggle('hid', v !== 'mac');
+      d.querySelector('.nl-fw').classList.toggle('hid', v !== 'm3ufile'); d.querySelector('.nl-uw').classList.toggle('hid', v === 'm3ufile');
+      d.querySelector('.nl-ul').textContent = x ? 'URL serwera (http://host:port)' : v === 'mac' ? 'URL portalu (http://host:port/c/)' : 'URL playlisty'; };
     t.onchange = upd; upd(); d.querySelector('.nl-x').onclick = () => { if (document.querySelectorAll('.nl').length > 1) { d.remove(); renum(); } };
     $('nlists').appendChild(d); renum(); return d; }
   function renum() { document.querySelectorAll('.nl').forEach((d, i) => d.querySelector('.nl-h b').textContent = 'Lista ' + (i + 1)); }
-  function collect() { const out = []; for (const d of document.querySelectorAll('.nl')) { const v = c => d.querySelector(c).value.trim(), t = v('.nl-t');
+  const readFile = f => new Promise((ok, no) => { const r = new FileReader(); r.onload = () => ok(String(r.result || '')); r.onerror = () => no(new Error('Nie udało się odczytać pliku')); r.readAsText(f); });
+  async function collect() { const out = []; for (const d of document.querySelectorAll('.nl')) { const v = c => d.querySelector(c).value.trim(), t = v('.nl-t');
+      const lbl = () => v('.nl-n') || d.querySelector('.nl-h b').textContent;
+      if (t === 'm3ufile') { const f = d.querySelector('.nl-f').files[0]; if (!f) throw new Error('Lista „' + lbl() + '”: wybierz plik M3U');
+        const c = await readFile(f); if (!/#EXTINF|https?:\/\//i.test(c.slice(0, 200000))) throw new Error('Plik „' + f.name + '” nie wygląda na playlistę M3U');
+        const o = { type: 'm3ufile', name: v('.nl-n') || f.name.replace(/\.m3u8?$/i, '').slice(0, 60), content: c };
+        const e = v('.nl-e'); if (e) { if (!/^https?:\/\/\S+$/i.test(e)) throw new Error('Zły adres EPG'); o.epg = e; } out.push(o); continue; }
       const o = { type: t, name: v('.nl-n'), url: v('.nl-u') }; if (!/^https?:\/\/\S+$/i.test(o.url)) throw new Error('Lista „' + (o.name || d.querySelector('.nl-h b').textContent) + '”: podaj adres zaczynający się od http:// lub https://');
+      if (t === 'mac') { const m = v('.nl-m').toUpperCase().replace(/[^0-9A-F]/g, ''); if (m.length !== 12) throw new Error('Portal MAC: podaj adres MAC (12 znaków, np. 00:1A:79:AB:CD:EF)'); o.mac = m.match(/../g).join(':'); }
       if (t === 'xtream') { o.username = v('.nl-us'); o.password = d.querySelector('.nl-pw').value; if (!o.username || !o.password) throw new Error('Xtream: podaj użytkownika i hasło'); }
       const e = v('.nl-e'); if (e) { if (!/^https?:\/\/\S+$/i.test(e)) throw new Error('Zły adres EPG'); o.epg = e; } out.push(o); }
     return out; }
@@ -76,9 +98,9 @@ input,select{border-radius:12px;border-color:rgba(201,162,74,.35)}body{backgroun
     row(); $('nadd').onclick = () => { row().querySelector('.nl-u').focus(); };
     $('ncode').oninput = e => { const c = e.target.value.toUpperCase().replace(/[^0-9A-Z]/g, '').slice(0, 8); e.target.value = c.length > 4 ? c.slice(0, 4) + '-' + c.slice(4) : c; };
     $('nsend').onclick = async () => { const code = normCode($('ncode').value); if (!code) return msg('Wpisz 8-znakowy kod z ekranu telewizora (np. ABCD-2345)', false);
-      let lists; try { lists = collect(); } catch (e) { return msg(e.message, false); }
-      const plain = JSON.stringify({ v: 1, lists }); $('nsend').disabled = true; msg('Szyfrowanie i wysyłanie…');
-      try { if (nativeSend) await nativeSend(code, plain); else await webSend(code, plain);
+      let lists; try { lists = await collect(); } catch (e) { return msg(e.message, false); }
+      const plain = JSON.stringify({ v: 1, lists }); $('nsend').disabled = true; msg(lists.some(l => l.type === 'm3ufile') ? 'Szyfrowanie i wysyłanie pliku… (może chwilę potrwać)' : 'Szyfrowanie i wysyłanie…');
+      try { if (nativeSend) await nativeSend(code, plain); else await anySend(code, plain);
         msg(`✔ Wysłano ${lists.length} ${lists.length === 1 ? 'listę' : lists.length < 5 ? 'listy' : 'list'}. Sprawdź telewizor – lista pojawi się w „☰ Listy” w ciągu kilku sekund.`, true); }
       catch (e) { msg('✖ Nie wysłano: ' + e.message, false); } finally { $('nsend').disabled = false; } };
   };
