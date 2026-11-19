@@ -1,32 +1,108 @@
 <!DOCTYPE html><html lang="pl"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
 <meta name="referrer" content="no-referrer"><title>Latino420 – wyślij listę</title>
-<meta http-equiv="Content-Security-Policy" content="default-src 'none'; script-src 'unsafe-inline'; style-src 'unsafe-inline'; connect-src https://ntfy.sh https://ntfy.envs.net; img-src data:">
+<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 16 16'%3E%3Ccircle cx='8' cy='8' r='8' fill='%23ff3db4'/%3E%3C/svg%3E">
+<meta http-equiv="Content-Security-Policy" content="default-src 'none'; script-src 'unsafe-inline'; style-src 'unsafe-inline'; connect-src https://ntfy.sh https://ntfy.envs.net; img-src 'self' data:">
 <style>
-body{background:#0B0B0B;color:#eee;font-family:sans-serif;margin:0;padding:16px}
-h1{color:#E6C878;text-align:center;margin:6px 0}.sub{text-align:center;color:#B5B5B5;margin:0 0 10px}
-.card{background:#141414;border:1px solid #3a3220;border-radius:12px;padding:14px;margin:12px 0}h3{color:#B8902F;margin:0 0 8px}
-label{display:block;color:#B5B5B5;font-size:13px;margin:8px 0 4px}input,select{width:100%;box-sizing:border-box;padding:10px;background:#0B0B0B;color:#fff;border:1px solid #3a3220;border-radius:8px}
-input:focus,select:focus{border-color:#B8902F;outline:none}.btn{width:100%;margin-top:10px;padding:12px;border:0;border-radius:8px;background:linear-gradient(135deg,#8C6A1F,#C9A24A 35%,#E6C878 55%,#A67C2E);color:#0B0B0B;font-weight:700;font-size:15px}
-.btn2{background:transparent;border:1px solid #B8902F;color:#E6C878}.row{display:flex;gap:8px}.row .btn{flex:1}
-.dev{padding:10px;border:1px solid #3a3220;border-radius:8px;margin-top:6px;cursor:pointer}.dev.sel{border-color:#B8902F;background:#1f1a0e;color:#E6C878}
-#msg{text-align:center;margin-top:10px;color:#E6C878;min-height:20px}.hid{display:none}
-.ew{display:flex;gap:6px}.ew input{flex:1}.eb{flex:none;width:auto!important;margin:0!important;padding:8px 10px!important;background:transparent!important;border:1px solid #8C6A1F!important;color:#E6C878!important;border-radius:8px;font-size:12px!important}
-.card{background:linear-gradient(160deg,rgba(40,33,18,.55),rgba(14,13,10,.85));border:1px solid rgba(201,162,74,.35);border-radius:18px;box-shadow:0 10px 30px rgba(0,0,0,.5),inset 0 1px 0 rgba(255,235,180,.1)}
-h1{font-size:28px;font-weight:800;background:linear-gradient(135deg,#8C6A1F,#C9A24A 35%,#E6C878 55%,#A67C2E);-webkit-background-clip:text;color:transparent}
-h3{color:#C9A24A}.btn{border-radius:12px;box-shadow:0 6px 18px rgba(184,144,47,.25);transition:transform .25s cubic-bezier(.34,1.56,.64,1)}.btn:active{transform:scale(.96)}
-input,select{border-radius:12px;border-color:rgba(201,162,74,.35)}body{background:radial-gradient(ellipse at top,#1d170b,#070707 60%)}.ver{text-align:center;color:#6d6040;font-size:11px;margin-top:14px}
-.hid{display:none}.code{font:800 30px ui-monospace,monospace;letter-spacing:.15em;text-align:center;text-transform:uppercase}
-.nl{border:1px solid rgba(201,162,74,.35);border-radius:12px;padding:10px;margin:8px 0}.nl-h{display:flex;justify-content:space-between;align-items:center;color:#E6C878}
-.nl-x{background:transparent;border:1px solid #8C6A1F;color:#E6C878;border-radius:8px;padding:4px 10px}.sub2{color:#B5B5B5;font-size:13px;margin:0 0 8px}
-#nmsg{text-align:center;margin:12px 0;min-height:22px;color:#E6C878}#nmsg.ok{color:#8fe08f}#nmsg.err{color:#ff8a7a}
-.btn:disabled{opacity:.5}input,select{font-size:16px}</style></head><body>
-<h1>Latino420</h1><p class="sub">Wyślij listę na telewizor przez internet</p>
-<div class="card"><h3>1. Kod z telewizora</h3><p class="sub2">W Latino420: ☰ Listy → ＋ Dodaj nową listę → 🌍 Odbierz przez internet</p>
- <input id="ncode" class="code" inputmode="text" autocomplete="off" autocapitalize="characters" spellcheck="false" maxlength="9" placeholder="XXXX-XXXX"></div>
-<div class="card"><h3>2. Listy</h3><div id="nlists"></div><button type="button" class="btn btn2" id="nadd">＋ Dodaj kolejną listę</button></div>
-<button type="button" class="btn" id="nsend">Wyślij do telewizora</button><div id="nmsg"></div>
-
-<p class="ver">Szyfrowanie AES-256 na tym urządzeniu • przekaźnik ntfy widzi tylko szyfrogram • strona nic nie zapisuje</p>
+:root{color-scheme:dark;--pink:#ff3db4;--hot:#ff6aa8;--teal:#2ef0d4;--txt:#fff7fb;--mut:#f0c2dc}
+*{box-sizing:border-box}
+html,body{margin:0;min-height:100%;color:var(--txt);font-family:system-ui,-apple-system,Segoe UI,Roboto,sans-serif;background:#1a0830}
+body{min-height:100dvh;overflow-x:hidden}
+/* iOS-safe full-screen bg: fixed layer + cover, NOT background-attachment:fixed */
+.bg{position:fixed;inset:0;z-index:0;pointer-events:none;width:100%;height:100%;min-height:100dvh;
+  background-color:#1a0830;
+  background-image:url("bg-gta.jpg");
+  background-image:image-set(url("bg-gta.webp") type("image/webp"),url("bg-gta.jpg") type("image/jpeg"));
+  background-size:cover;background-position:50% 40%;background-repeat:no-repeat}
+.bg::after{content:"";position:absolute;inset:0;
+  background:
+    linear-gradient(180deg,rgba(18,0,36,.12) 0%,rgba(12,0,24,.22) 18%,rgba(10,0,20,.32) 55%,rgba(8,0,16,.18) 100%),
+    radial-gradient(ellipse at 50% 110%,rgba(8,0,16,.28),transparent 50%)}
+.wrap{position:relative;z-index:1;max-width:440px;margin:0 auto;padding:16px 16px max(20px,env(safe-area-inset-bottom))}
+.hero{text-align:center;margin:2px 0 12px;position:relative}
+.tag{display:inline-block;margin:0 0 8px;padding:3px 10px;border:1px solid var(--teal);color:var(--teal);
+  font-size:10px;font-weight:800;letter-spacing:.22em;border-radius:2px;
+  background:rgba(8,0,16,.45);box-shadow:0 0 14px rgba(46,240,212,.55),0 0 28px rgba(255,61,180,.25);
+  animation:tagpulse 2.4s ease-in-out infinite}
+h1{margin:0;font-style:italic;font-weight:900;text-transform:uppercase;
+  font-size:clamp(48px,16vw,70px);letter-spacing:-.06em;line-height:.82;
+  background:linear-gradient(180deg,#fff 0%,#f3f6ff 18%,#b9c2d8 42%,#fff 52%,#ffc6ee 78%,#fff 100%);
+  -webkit-background-clip:text;background-clip:text;color:transparent;-webkit-text-fill-color:transparent;
+  filter:drop-shadow(0 0 6px #ff3db4) drop-shadow(0 0 18px rgba(255,61,180,.85)) drop-shadow(3px 3px 0 #2ef0d4) drop-shadow(0 0 28px rgba(46,240,212,.45));
+  animation:flicker 5.5s step-end infinite}
+.sub{margin:12px 0 0;color:#fff;font-size:14px;font-weight:650;text-shadow:0 0 10px rgba(255,61,180,.6),0 2px 10px rgba(0,0,0,.7)}
+.frame{position:relative;border-radius:20px;padding:2px;margin:12px 0;overflow:hidden;
+  box-shadow:0 0 22px rgba(255,61,180,.28),0 0 40px rgba(46,240,212,.12),0 14px 32px rgba(0,0,0,.45)}
+.frame::before{content:"";position:absolute;inset:-90%;background:conic-gradient(#ff3db4,#2ef0d4,#ff8a3a,#ff3db4,#7a5cff,#2ef0d4,#ff3db4);animation:spin 3.2s linear infinite}
+.card{position:relative;z-index:1;border-radius:18px;padding:14px 14px 15px;
+  background:linear-gradient(180deg,rgba(22,4,36,.9),rgba(8,0,18,.94));
+  box-shadow:inset 0 1px 0 rgba(255,180,220,.16);
+  backdrop-filter:blur(16px) saturate(1.35);-webkit-backdrop-filter:blur(16px) saturate(1.35)}
+h3{margin:0 0 6px;color:#ffd0ee;font-size:15px;font-weight:800;letter-spacing:.06em;text-transform:uppercase;
+  text-shadow:0 0 10px rgba(255,80,200,.5)}
+h3::before{content:"";display:inline-block;width:8px;height:8px;margin-right:8px;border-radius:50%;background:var(--teal);box-shadow:0 0 8px var(--teal),0 0 16px var(--teal);vertical-align:middle;animation:tagpulse 2s ease-in-out infinite}
+.sub2{margin:0 0 10px;color:var(--mut);font-size:13px;line-height:1.45}
+label{display:block;color:#f3c6e4;font-size:12px;font-weight:700;letter-spacing:.04em;text-transform:uppercase;margin:8px 0 4px}
+input,select{width:100%;box-sizing:border-box;padding:12px 14px;font-size:16px;color:#fff;background:rgba(10,0,20,.6);
+  border:1px solid rgba(255,80,200,.4);border-radius:12px;outline:none;transition:border-color .2s,box-shadow .2s}
+select{appearance:none;-webkit-appearance:none;padding-right:42px;background-image:url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='16' height='16' viewBox='0 0 16 16'><path fill='%232ef0d4' d='M4 6l4 5 4-5z'/></svg>");background-repeat:no-repeat;background-position:right 12px center;background-color:rgba(10,0,20,.6)}
+input:focus,select:focus{border-color:var(--teal);box-shadow:0 0 0 3px rgba(46,240,212,.28),0 0 18px rgba(255,61,180,.3)}
+.code{font:800 italic 26px ui-monospace,SFMono-Regular,Menlo,Consolas,monospace;letter-spacing:.18em;text-align:center;text-transform:uppercase;padding:14px 8px;
+  border-color:rgba(46,240,212,.55);box-shadow:0 0 18px rgba(46,240,212,.22),0 0 8px rgba(255,61,180,.15)}
+.btn{width:100%;margin-top:10px;padding:14px 16px;border:0;border-radius:14px;
+  background:linear-gradient(135deg,#ff4ecb 0%,#ff3d8a 40%,#ff7a3a 100%);
+  color:#1a0010;font-weight:800;font-size:16px;letter-spacing:.03em;
+  box-shadow:0 0 22px rgba(255,61,180,.65),0 0 40px rgba(255,80,40,.3),0 8px 18px rgba(0,0,0,.4);
+  transition:transform .2s,filter .2s,box-shadow .2s;animation:btnGlow 2.2s ease-in-out infinite}
+.btn:hover{filter:brightness(1.08)}
+.btn:active{transform:scale(.97)}
+.btn:disabled{opacity:.5;filter:none;box-shadow:none;animation:none}
+.btn2{background:rgba(0,20,24,.45);border:1px solid var(--teal);color:var(--teal);box-shadow:0 0 16px rgba(46,240,212,.3);animation:none}
+.btn2:hover{background:rgba(46,240,212,.12);filter:none}
+.nl{margin:8px 0;padding:12px;border-radius:14px;border:1px solid rgba(255,80,200,.3);background:rgba(8,0,18,.4)}
+.nl-h{display:flex;justify-content:space-between;align-items:center;color:#ffd0ee;margin-bottom:4px}
+.nl-x{background:transparent;border:1px solid rgba(46,240,212,.45);color:var(--teal);border-radius:10px;padding:8px 12px;min-height:44px;min-width:44px;font-size:16px}
+.nl-x:hover,.nl-x:focus-visible{background:rgba(46,240,212,.15);outline:none;box-shadow:0 0 12px rgba(46,240,212,.4)}
+.hid{display:none!important}
+#nmsg{text-align:center;margin:12px 0 0;min-height:22px;color:#ffd0ee;font-weight:650;line-height:1.45;text-shadow:0 1px 8px #000}
+#nmsg.ok,#nmsg.err{padding:12px 14px;border-radius:12px;backdrop-filter:blur(10px)}
+#nmsg.ok{color:#b8ffe8;background:rgba(20,80,70,.45);border:1px solid rgba(46,240,212,.5);box-shadow:0 0 16px rgba(46,240,212,.2)}
+#nmsg.err{color:#ffd0e0;background:rgba(120,20,60,.45);border:1px solid rgba(255,80,140,.55);box-shadow:0 0 16px rgba(255,61,180,.2)}
+.ver{text-align:center;color:rgba(255,230,245,.78);font-size:11px;line-height:1.5;margin:16px 8px 0;text-shadow:0 1px 8px rgba(0,0,0,.8)}
+@keyframes spin{to{transform:rotate(1turn)}}
+@keyframes flicker{
+  0%,86%,90%,100%{opacity:1;filter:drop-shadow(0 0 6px #ff3db4) drop-shadow(0 0 18px rgba(255,61,180,.85)) drop-shadow(3px 3px 0 #2ef0d4) drop-shadow(0 0 28px rgba(46,240,212,.45))}
+  87%{opacity:.78;filter:drop-shadow(0 0 2px #ff3db4) drop-shadow(3px 3px 0 #2ef0d4)}
+  89%{opacity:.55;filter:drop-shadow(0 0 14px #2ef0d4) drop-shadow(3px 3px 0 #ff3db4)}
+  91%{opacity:1}
+}
+@keyframes tagpulse{0%,100%{box-shadow:0 0 10px rgba(46,240,212,.4)}50%{box-shadow:0 0 18px rgba(46,240,212,.8),0 0 28px rgba(255,61,180,.3)}}
+@keyframes btnGlow{0%,100%{box-shadow:0 0 22px rgba(255,61,180,.65),0 0 40px rgba(255,80,40,.28),0 8px 18px rgba(0,0,0,.4)}50%{box-shadow:0 0 32px rgba(255,61,180,.9),0 0 56px rgba(255,80,40,.45),0 8px 18px rgba(0,0,0,.4)}}
+@media (prefers-reduced-motion:reduce){
+  *,*::before,*::after{animation:none!important;transition:none!important}
+  h1{filter:drop-shadow(0 0 6px #ff3db4) drop-shadow(0 0 18px rgba(255,61,180,.85)) drop-shadow(3px 3px 0 #2ef0d4) drop-shadow(0 0 28px rgba(46,240,212,.45))}
+}
+input[type=file]{padding:10px;accent-color:#ff3db4}
+</style></head><body>
+<div class="bg" aria-hidden="true"></div>
+<div class="wrap">
+  <header class="hero">
+    <p class="tag">IPTV · VIP</p>
+    <h1>Latino420</h1>
+    <p class="sub">Wyślij listę na telewizor przez internet</p>
+  </header>
+  <div class="frame"><div class="card">
+    <h3>1. Kod z telewizora</h3>
+    <p class="sub2">W Latino420: ☰ Listy → ＋ Dodaj nową listę → 🌍 Odbierz przez internet</p>
+    <input id="ncode" class="code" inputmode="text" autocomplete="off" autocapitalize="characters" spellcheck="false" maxlength="9" placeholder="XXXX-XXXX">
+  </div></div>
+  <div class="frame"><div class="card">
+    <h3>2. Listy</h3>
+    <div id="nlists"></div>
+    <button type="button" class="btn btn2" id="nadd">＋ Dodaj kolejną listę</button>
+  </div></div>
+  <button type="button" class="btn" id="nsend">Wyślij do telewizora</button><div id="nmsg"></div>
+  <p class="ver">Szyfrowanie AES-256 na tym urządzeniu • przekaźnik ntfy widzi tylko szyfrogram • strona nic nie zapisuje</p>
+</div>
 <script>/* Latino420 – wysyłanie list przez internet (kod 8 znaków). Wspólne dla strony (iPhone/Safari) i aplikacji Latino420 Remote.
    Szyfrowanie na urządzeniu: PBKDF2-SHA256 + AES-256-GCM. Strona nie zapisuje list ani kodów. */
 (function () {
