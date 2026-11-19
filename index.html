@@ -80,15 +80,11 @@ input:focus,select:focus{border-color:var(--teal);box-shadow:0 0 0 3px rgba(46,2
 
 
 
-/* cash: same Noto Color Emoji bill PNG in site and APK, WebView-safe (no inset, no var() in keyframes) */
+/* GTA money: 12 falling 💵, WebView-safe (Chrome 74+), always in front */
 .cash{position:fixed;top:0;right:0;bottom:0;left:0;width:100%;height:100%;height:100vh;z-index:2147483000;pointer-events:none}
-.cash i{position:absolute;display:block;margin:0;padding:0;border:0;width:61px;height:40px;
-  background-image:url("data:image/png;base64,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");
-  background-repeat:no-repeat;background-position:center;
-  -webkit-background-size:contain;background-size:contain;
-  opacity:.85;
-  -webkit-filter:drop-shadow(0 0 6px #39ff14) drop-shadow(0 0 14px #22c55e);
-  filter:drop-shadow(0 0 6px #39ff14) drop-shadow(0 0 14px #22c55e);
+.cash i{position:absolute;display:block;margin:0;padding:0;font-style:normal;font-weight:400;line-height:1;
+  font-size:40px;opacity:.85;color:#9dff7a;
+  text-shadow:0 0 8px #39ff14,0 0 18px #22c55e,0 0 28px rgba(57,255,20,.85),0 0 40px rgba(57,255,20,.45);
   -webkit-animation-fill-mode:both;animation-fill-mode:both}
 @-webkit-keyframes cashf0{0%{-webkit-transform:translate3d(0,0,0) rotate(-16deg);transform:translate3d(0,0,0) rotate(-16deg)}100%{-webkit-transform:translate3d(8px,12px,0) rotate(8deg);transform:translate3d(8px,12px,0) rotate(8deg)}}
 @keyframes cashf0{0%{-webkit-transform:translate3d(0,0,0) rotate(-16deg);transform:translate3d(0,0,0) rotate(-16deg)}100%{-webkit-transform:translate3d(8px,12px,0) rotate(8deg);transform:translate3d(8px,12px,0) rotate(8deg)}}
@@ -128,8 +124,6 @@ input:focus,select:focus{border-color:var(--teal);box-shadow:0 0 0 3px rgba(46,2
   .cash i:nth-child(10){top:72%}
   .cash i:nth-child(11){top:80%}
   .cash i:nth-child(12){top:86%}
-}
-@media (prefers-reduced-motion:reduce){
   .hero *,.tag,.frame::before,h1,h3::before,.btn{animation:none!important;transition:none!important}
   h1{filter:drop-shadow(0 0 6px #ff3db4) drop-shadow(0 0 18px rgba(255,61,180,.85)) drop-shadow(3px 3px 0 #2ef0d4) drop-shadow(0 0 28px rgba(46,240,212,.45))}
 }
@@ -156,18 +150,18 @@ input[type=file]{padding:10px;accent-color:#ff3db4}
   <p class="ver">Szyfrowanie AES-256 na tym urządzeniu • przekaźnik ntfy widzi tylko szyfrogram • strona nic nie zapisuje</p>
 </div>
 <div class="cash" aria-hidden="true">
-  <i style="left:3%;top:5%;width:70px;height:46px;-webkit-animation:cashf0 4.2s ease-in-out 0s infinite alternate;animation:cashf0 4.2s ease-in-out 0s infinite alternate"></i>
-  <i style="left:88%;top:3%;width:67px;height:44px;-webkit-animation:cashf1 4.8s ease-in-out -1.2s infinite alternate;animation:cashf1 4.8s ease-in-out -1.2s infinite alternate"></i>
-  <i style="left:10%;top:-8%;width:58px;height:38px;-webkit-animation:cash0 16s linear -3s infinite normal;animation:cash0 16s linear -3s infinite normal"></i>
-  <i style="left:28%;top:-8%;width:64px;height:42px;-webkit-animation:cash1 18s linear -6s infinite normal;animation:cash1 18s linear -6s infinite normal"></i>
-  <i style="left:48%;top:-8%;width:64px;height:42px;-webkit-animation:cash2 15s linear -4s infinite normal;animation:cash2 15s linear -4s infinite normal"></i>
-  <i style="left:70%;top:-8%;width:61px;height:40px;-webkit-animation:cash3 17s linear -8s infinite normal;animation:cash3 17s linear -8s infinite normal"></i>
-  <i style="left:86%;top:-8%;width:55px;height:36px;-webkit-animation:cash4 16s linear -9.5s infinite normal;animation:cash4 16s linear -9.5s infinite normal"></i>
-  <i style="left:6%;top:-8%;width:52px;height:34px;-webkit-animation:cash5 14s linear -7s infinite normal;animation:cash5 14s linear -7s infinite normal"></i>
-  <i style="left:36%;top:-8%;width:73px;height:48px;-webkit-animation:cash6 19s linear -11s infinite normal;animation:cash6 19s linear -11s infinite normal"></i>
-  <i style="left:62%;top:-8%;width:55px;height:36px;-webkit-animation:cash7 15s linear -10s infinite normal;animation:cash7 15s linear -10s infinite normal"></i>
-  <i style="left:18%;top:-8%;width:61px;height:40px;-webkit-animation:cash8 17s linear -12s infinite normal;animation:cash8 17s linear -12s infinite normal"></i>
-  <i style="left:78%;top:-8%;width:67px;height:44px;-webkit-animation:cash9 13s linear -5s infinite normal;animation:cash9 13s linear -5s infinite normal"></i>
+  <i style="left:3%;top:5%;font-size:46px;-webkit-animation:cashf0 4.2s ease-in-out 0s infinite alternate;animation:cashf0 4.2s ease-in-out 0s infinite alternate">💵</i>
+  <i style="left:88%;top:3%;font-size:44px;-webkit-animation:cashf1 4.8s ease-in-out -1.2s infinite alternate;animation:cashf1 4.8s ease-in-out -1.2s infinite alternate">💵</i>
+  <i style="left:10%;top:-8%;font-size:38px;-webkit-animation:cash0 16s linear -3s infinite normal;animation:cash0 16s linear -3s infinite normal">💵</i>
+  <i style="left:28%;top:-8%;font-size:42px;-webkit-animation:cash1 18s linear -6s infinite normal;animation:cash1 18s linear -6s infinite normal">💵</i>
+  <i style="left:48%;top:-8%;font-size:42px;-webkit-animation:cash2 15s linear -4s infinite normal;animation:cash2 15s linear -4s infinite normal">💵</i>
+  <i style="left:70%;top:-8%;font-size:40px;-webkit-animation:cash3 17s linear -8s infinite normal;animation:cash3 17s linear -8s infinite normal">💵</i>
+  <i style="left:86%;top:-8%;font-size:36px;-webkit-animation:cash4 16s linear -9.5s infinite normal;animation:cash4 16s linear -9.5s infinite normal">💵</i>
+  <i style="left:6%;top:-8%;font-size:34px;-webkit-animation:cash5 14s linear -7s infinite normal;animation:cash5 14s linear -7s infinite normal">💵</i>
+  <i style="left:36%;top:-8%;font-size:48px;-webkit-animation:cash6 19s linear -11s infinite normal;animation:cash6 19s linear -11s infinite normal">💵</i>
+  <i style="left:62%;top:-8%;font-size:36px;-webkit-animation:cash7 15s linear -10s infinite normal;animation:cash7 15s linear -10s infinite normal">💵</i>
+  <i style="left:18%;top:-8%;font-size:40px;-webkit-animation:cash8 17s linear -12s infinite normal;animation:cash8 17s linear -12s infinite normal">💵</i>
+  <i style="left:78%;top:-8%;font-size:44px;-webkit-animation:cash9 13s linear -5s infinite normal;animation:cash9 13s linear -5s infinite normal">💵</i>
 </div>
 <script>/* Latino420 – wysyłanie list przez internet (kod 8 znaków). Wspólne dla strony (iPhone/Safari) i aplikacji Latino420 Remote.
    Szyfrowanie na urządzeniu: PBKDF2-SHA256 + AES-256-GCM. Strona nie zapisuje list ani kodów. */
