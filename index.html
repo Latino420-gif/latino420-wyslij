@@ -17,7 +17,7 @@ body{min-height:100dvh;overflow-x:hidden}
   background:
     linear-gradient(180deg,rgba(18,0,36,.12) 0%,rgba(12,0,24,.22) 18%,rgba(10,0,20,.32) 55%,rgba(8,0,16,.18) 100%),
     radial-gradient(ellipse at 50% 110%,rgba(8,0,16,.28),transparent 50%)}
-.wrap{position:relative;z-index:1;max-width:440px;margin:0 auto;padding:16px 16px max(20px,env(safe-area-inset-bottom))}
+.wrap{position:relative;z-index:2;max-width:440px;margin:0 auto;padding:16px 16px max(20px,env(safe-area-inset-bottom))}
 .hero{text-align:center;margin:2px 0 12px;position:relative}
 .tag{display:inline-block;margin:0 0 8px;padding:3px 10px;border:1px solid var(--teal);color:var(--teal);
   font-size:10px;font-weight:800;letter-spacing:.22em;border-radius:2px;
@@ -77,13 +77,59 @@ input:focus,select:focus{border-color:var(--teal);box-shadow:0 0 0 3px rgba(46,2
 }
 @keyframes tagpulse{0%,100%{box-shadow:0 0 10px rgba(46,240,212,.4)}50%{box-shadow:0 0 18px rgba(46,240,212,.8),0 0 28px rgba(255,61,180,.3)}}
 @keyframes btnGlow{0%,100%{box-shadow:0 0 22px rgba(255,61,180,.65),0 0 40px rgba(255,80,40,.28),0 8px 18px rgba(0,0,0,.4)}50%{box-shadow:0 0 32px rgba(255,61,180,.9),0 0 56px rgba(255,80,40,.45),0 8px 18px rgba(0,0,0,.4)}}
+
+
+/* GTA money vibe: neon bills over the UI, no taps */
+.cash{position:fixed;inset:0;z-index:20;pointer-events:none;overflow:hidden}
+.cash i{position:absolute;left:var(--x);top:-8%;font-style:italic;font-weight:900;line-height:1;
+  color:#9dff7a;text-shadow:0 0 8px #39ff14,0 0 18px #22c55e,0 0 28px rgba(57,255,20,.8);
+  font-size:var(--sz,36px);opacity:.85;
+  animation:cashfall var(--t,16s) linear var(--d,0s) infinite;
+  will-change:transform,opacity;filter:drop-shadow(0 0 6px rgba(57,255,20,.7))}
+.cash i.note{width:54px;height:32px;font-size:20px;color:#f3ffe8;text-align:center;line-height:32px;
+  letter-spacing:.02em;text-shadow:0 0 6px #fff;
+  background:linear-gradient(180deg,#5fd96a,#1e8a3a 55%,#14662c);
+  border-radius:4px;box-shadow:0 0 12px rgba(80,255,90,.65),0 0 22px rgba(57,255,20,.35),inset 0 0 0 1px rgba(210,255,210,.55);
+  font-style:normal}
+.cash i.emoji{font-style:normal;text-shadow:0 0 10px rgba(57,255,20,.85);filter:drop-shadow(0 0 8px #39ff14)}
+.cash i.float{top:var(--y,6%);animation:cashfloat 4.2s ease-in-out var(--d,0s) infinite alternate}
+@keyframes cashfall{
+  0%{transform:translate3d(0,-8vh,0) rotate(var(--r,-12deg));opacity:.85}
+  90%{opacity:.85}
+  100%{transform:translate3d(var(--dx,16px),110vh,0) rotate(var(--r2,18deg));opacity:.7}
+}
+@keyframes cashfloat{
+  0%{transform:translate3d(0,0,0) rotate(var(--r,-8deg))}
+  100%{transform:translate3d(var(--dx,8px),12px,0) rotate(var(--r2,10deg))}
+}
+  8%{opacity:.72}
+  85%{opacity:.62}
+  100%{transform:translate3d(var(--dx,12px),108vh,0) rotate(var(--r2,18deg));opacity:0}
+}
 @media (prefers-reduced-motion:reduce){
-  *,*::before,*::after{animation:none!important;transition:none!important}
+  .cash{display:block!important}
+  .cash i{animation:none!important;opacity:.85!important;top:var(--y,20%);transform:rotate(var(--r,-8deg))}
+*,*::before,*::after{animation:none!important;transition:none!important}
   h1{filter:drop-shadow(0 0 6px #ff3db4) drop-shadow(0 0 18px rgba(255,61,180,.85)) drop-shadow(3px 3px 0 #2ef0d4) drop-shadow(0 0 28px rgba(46,240,212,.45))}
 }
 input[type=file]{padding:10px;accent-color:#ff3db4}
 </style></head><body>
 <div class="bg" aria-hidden="true"></div>
+<div class="cash" aria-hidden="true">
+  <i class="float" style="--x:3%;--y:5%;--t:4.2s;--d:0s;--sz:46px;--r:-16deg;--r2:8deg;--dx:8px">$</i>
+  <i class="emoji float" style="--x:88%;--y:3%;--t:4.8s;--d:-1.2s;--sz:44px;--r:12deg;--r2:-6deg;--dx:-8px">💵</i>
+  <i style="--x:10%;--y:18%;--t:16s;--d:-3s;--sz:38px;--r:-14deg;--r2:16deg;--dx:18px">$</i>
+  <i class="note" style="--x:28%;--y:28%;--t:18s;--d:-6s;--r:10deg;--r2:-14deg;--dx:-14px">$</i>
+  <i class="emoji" style="--x:48%;--y:22%;--t:15s;--d:-4s;--sz:42px;--r:8deg;--r2:18deg;--dx:10px">💵</i>
+  <i style="--x:70%;--y:36%;--t:17s;--d:-8s;--sz:40px;--r:-10deg;--r2:12deg;--dx:16px">$</i>
+  <i class="note" style="--x:86%;--y:48%;--t:16s;--d:-9.5s;--r:16deg;--r2:-8deg;--dx:-12px">$</i>
+  <i style="--x:6%;--y:58%;--t:14s;--d:-7s;--sz:34px;--r:6deg;--r2:-18deg;--dx:22px">$</i>
+  <i class="emoji" style="--x:36%;--y:64%;--t:19s;--d:-11s;--sz:48px;--r:-8deg;--r2:14deg;--dx:-10px">💵</i>
+  <i style="--x:62%;--y:72%;--t:15s;--d:-10s;--sz:36px;--r:14deg;--r2:-12deg;--dx:14px">$</i>
+  <i class="note" style="--x:18%;--y:80%;--t:17s;--d:-12s;--r:-12deg;--r2:10deg;--dx:8px">$</i>
+  <i style="--x:78%;--y:86%;--t:13s;--d:-5s;--sz:44px;--r:-18deg;--r2:20deg;--dx:-16px">$</i>
+</div>
+
 <div class="wrap">
   <header class="hero">
     <p class="tag">IPTV · VIP</p>
